@@ -1,7 +1,7 @@
 
 import { toast } from "sonner";
 
-const API_BASE_URL = 'http://localhost:8085/api';
+const API_BASE_URL = 'http://backend:8085/api';
 
 class ApiClient {
   private getHeaders(includeAuth = true): HeadersInit {
