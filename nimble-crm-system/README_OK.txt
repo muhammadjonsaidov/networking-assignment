@@ -1,1 +1,1 @@
-npm install
+git hub action
