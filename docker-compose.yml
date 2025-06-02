@@ -1,0 +1,44 @@
+# version: '3.8' 
+services:
+  backend:
+    build:
+      context: ./app-small-crm 
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/crm
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: root
+      APP_JWT_ACCESS_SECRETKEY: 3crt346ef14937c1c0ea519f8fc123a80fcd04a7420f8e8bcd0a7567c272e007b
+      APP_JWT_ACCESS_EXPIRATIONAT: 3000000
+      APP_JWT_REFRESH_SECRETKEY: 1abc346ef14937c1c0ea519f8fc123a80fcd04a7420f8e8bcd0a7567c272e007b
+      APP_JWT_REFRESH_EXPIRATIONAT: 9000000
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: crm
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: root
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+
+  frontend:
+    build:
+      context: ./nimble-crm-system 
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  db_data:
