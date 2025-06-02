@@ -41,16 +41,15 @@ public class DashboardStatsService {
         // For "current month" stats, using 'today' as end date gives up-to-the-minute,
         // while 'atEndOfMonth' gives stats for the full month IF it's already passed.
         // Let's use 'today' for current month to reflect current progress.
-        LocalDate currentMonthProgressEnd = today;
 
 
         YearMonth lastYearMonth = currentYearMonth.minusMonths(1);
         LocalDate lastMonthStart = lastYearMonth.atDay(1);
         LocalDate lastMonthEnd = lastYearMonth.atEndOfMonth();
 
-        Double revenueCurrentMonth = saleRepository.sumRevenueBetweenDates(currentMonthStart, currentMonthProgressEnd);
-        Long soldItemsCountCurrentMonth = saleRepository.countSalesBetweenDates(currentMonthStart, currentMonthProgressEnd);
-        Double avgSalesQtyCurrentMonth = saleRepository.avgSalesQuantityBetweenDates(currentMonthStart, currentMonthProgressEnd);
+        Double revenueCurrentMonth = saleRepository.sumRevenueBetweenDates(currentMonthStart, today);
+        Long soldItemsCountCurrentMonth = saleRepository.countSalesBetweenDates(currentMonthStart, today);
+        Double avgSalesQtyCurrentMonth = saleRepository.avgSalesQuantityBetweenDates(currentMonthStart, today);
 
         Double revenueLastMonth = saleRepository.sumRevenueBetweenDates(lastMonthStart, lastMonthEnd);
         Long soldItemsCountLastMonth = saleRepository.countSalesBetweenDates(lastMonthStart, lastMonthEnd);

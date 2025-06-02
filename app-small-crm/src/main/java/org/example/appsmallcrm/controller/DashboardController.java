@@ -46,13 +46,13 @@ public class DashboardController {
 
     @GetMapping("/recent-customers")
     public ResponseEntity<ApiResponse<List<Customer>>> getRecentCustomers(
-            @RequestParam(defaultValue = "5") int count) {
+            @RequestParam Integer count) {
         return ResponseEntity.ok(ApiResponse.success(dashboardStatsService.getRecentCustomers(count)));
     }
 
     @GetMapping("/recent-activities")
     public ResponseEntity<ApiResponse<List<Activity>>> getRecentActivities(
-            @RequestParam(defaultValue = "10") int count) {
+            @RequestParam(defaultValue = "5") int count) {
         return ResponseEntity.ok(ApiResponse.success(dashboardStatsService.getRecentActivities(count)));
     }
 }
