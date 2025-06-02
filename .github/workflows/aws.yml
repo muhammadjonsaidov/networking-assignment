@@ -24,46 +24,66 @@
 #    See the documentation for each action used below for the recommended IAM policies for this IAM user,
 #    and best practices on handling the access key credentials.
 
-name: Build and Push Docker Images
+name: Deploy to AWS ECS via ECR
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+
+env:
+  AWS_REGION: us-east-1
+  FRONTEND_ECR_REPO: nimble-frontend
+  BACKEND_ECR_REPO: nimble-backend
+  ECS_CLUSTER: nimble-cluster
+  FRONTEND_SERVICE: nimble-frontend-service
+  BACKEND_SERVICE: nimble-backend-service
 
 jobs:
-  build-and-push:
+  deploy:
+    name: Build and Deploy
     runs-on: ubuntu-latest
 
-    env:
-      AWS_REGION: us-east-1
-      ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
-      FRONT_IMAGE: nimble-frontend
-      BACK_IMAGE: nimble-backend
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build Docker images using Docker Compose
-        run: |
-          docker-compose build
+    - name: Set image tags
+      id: vars
+      run: |
+        echo "IMAGE_TAG=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
 
-      - name: Tag Docker images
-        run: |
-          docker tag nimble-crm-system_frontend $ECR_REGISTRY/$FRONT_IMAGE:latest
-          docker tag nimble-crm-system_backend $ECR_REGISTRY/$BACK_IMAGE:latest
+    - name: Build & Push Backend Image
+      run: |
+        docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_ECR_REPO }}:${{ steps.vars.outputs.IMAGE_TAG }} ./app-small-crm
+        docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.BACKEND_ECR_REPO }}:${{ steps.vars.outputs.IMAGE_TAG }}
 
-      - name: Push Docker images to ECR
-        run: |
-          docker push $ECR_REGISTRY/$FRONT_IMAGE:latest
-          docker push $ECR_REGISTRY/$BACK_IMAGE:latest
+    - name: Build & Push Frontend Image
+      run: |
+        docker build -t ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_ECR_REPO }}:${{ steps.vars.outputs.IMAGE_TAG }} ./nimble-crm-system
+        docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.FRONTEND_ECR_REPO }}:${{ steps.vars.outputs.IMAGE_TAG }}
+
+    - name: Update ECS Backend Service
+      run: |
+        aws ecs update-service \
+          --cluster ${{ env.ECS_CLUSTER }} \
+          --service ${{ env.BACKEND_SERVICE }} \
+          --force-new-deployment
+
+    - name: Update ECS Frontend Service
+      run: |
+        aws ecs update-service \
+          --cluster ${{ env.ECS_CLUSTER }} \
+          --service ${{ env.FRONTEND_SERVICE }} \
+          --force-new-deployment
