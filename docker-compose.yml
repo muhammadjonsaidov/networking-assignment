@@ -1,4 +1,4 @@
-# version: '3.8' 
+version: '3.8'
 services:
   backend:
     build:
@@ -17,6 +17,8 @@ services:
     depends_on:
       - db
     restart: always
+    networks:
+      - app-network
 
   db:
     image: postgres:16-alpine
@@ -29,6 +31,8 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     restart: always
+    networks:
+      - app-network
 
   frontend:
     build:
@@ -39,6 +43,11 @@ services:
     depends_on:
       - backend
     restart: always
+    networks:
+      - app-network
 
 volumes:
   db_data:
+
+networks:
+  app-network:
