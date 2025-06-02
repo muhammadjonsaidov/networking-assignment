@@ -24,66 +24,46 @@
 #    See the documentation for each action used below for the recommended IAM policies for this IAM user,
 #    and best practices on handling the access key credentials.
 
-name: Deploy to Amazon ECS
+name: Build and Push Docker Images
 
 on:
   push:
-    branches: [ "main" ]
-
-env:
-  AWS_REGION: us-east-1
-  ECR_REPOSITORY: nimble-ecr
-  ECS_SERVICE: nimble-service
-  ECS_CLUSTER: nimble-cluster
-  ECS_TASK_DEFINITION: .aws/task-definition.json
-  CONTAINER_NAME: nimble-container
-
-permissions:
-  contents: read
+    branches: [main]
 
 jobs:
-  deploy:
-    name: Deploy to ECS
+  build-and-push:
     runs-on: ubuntu-latest
-    environment: production
+
+    env:
+      AWS_REGION: us-east-1
+      ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com
+      FRONT_IMAGE: nimble-frontend
+      BACK_IMAGE: nimble-backend
 
     steps:
-      - name: Checkout source
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+          aws-region: us-east-1
 
       - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push Docker image
-        id: build-image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
+      - name: Build Docker images using Docker Compose
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+          docker-compose build
 
-      - name: Render ECS task definition
-        id: render-task
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
-        with:
-          task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: ${{ env.CONTAINER_NAME }}
-          image: ${{ steps.build-image.outputs.image }}
+      - name: Tag Docker images
+        run: |
+          docker tag nimble-crm-system_frontend $ECR_REGISTRY/$FRONT_IMAGE:latest
+          docker tag nimble-crm-system_backend $ECR_REGISTRY/$BACK_IMAGE:latest
 
-      - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.render-task.outputs.task-definition }}
-          service: ${{ env.ECS_SERVICE }}
-          cluster: ${{ env.ECS_CLUSTER }}
-          wait-for-service-stability: true
+      - name: Push Docker images to ECR
+        run: |
+          docker push $ECR_REGISTRY/$FRONT_IMAGE:latest
+          docker push $ECR_REGISTRY/$BACK_IMAGE:latest
