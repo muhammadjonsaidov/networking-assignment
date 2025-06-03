@@ -20,3 +20,10 @@ app:
     refresh:
       secretKey: 1abc346ef14937c1c0ea519f8fc123a80fcd04a7420f8e8bcd0a7567c272e007b
       expirationAt: 9000000
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    display-request-duration: true
+    operations-sorter: method
+    tags-sorter: alpha
