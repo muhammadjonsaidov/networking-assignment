@@ -1,7 +1,10 @@
 package org.example.appsmallcrm.config;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -9,8 +12,15 @@ import org.springframework.context.annotation.Configuration;
         info = @Info(
                 title = "Your Project API",
                 version = "1.0",
-                description = "API documentation for your project"
-        )
+                description = "API documentation with JWT support"
+        ),
+        security = @SecurityRequirement(name = "bearerAuth")
+)
+@SecurityScheme(
+        name = "bearerAuth",
+        type = SecuritySchemeType.HTTP,
+        scheme = "bearer",
+        bearerFormat = "JWT"
 )
 public class SwaggerConfig {
 }
