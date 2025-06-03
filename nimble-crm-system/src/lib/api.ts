@@ -1,7 +1,7 @@
 
 import { toast } from "sonner";
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8085/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://44.201.214.91:8085/api';
 
 class ApiClient {
   private getHeaders(includeAuth = true): HeadersInit {

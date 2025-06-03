@@ -89,7 +89,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("http://localhost:8080", "http://54.166.211.24:8080")); // For dev; be more specific in prod e.g. http://localhost:3000
+        configuration.setAllowedOriginPatterns(List.of("http://44.201.214.91:8080")); // For dev; be more specific in prod e.g. http://localhost:3000
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "Accept", "Origin", "X-Requested-With"));
         configuration.setExposedHeaders(List.of("Authorization")); // If you send tokens back in headers

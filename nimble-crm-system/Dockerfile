@@ -8,7 +8,7 @@ RUN npm install --frozen-lockfile
 
 COPY . .
 
-ENV VITE_API_URL=http://backend:8085
+ENV VITE_API_URL=http://44.201.214.91:8085
 
 RUN npm run build
 
