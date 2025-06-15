@@ -50,8 +50,10 @@ public class User {
     @Column(nullable = false)
     private Role role; // Changed from String to Enum
 
+    @Builder.Default
     private boolean isActive = true; // Default to active
 
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
 

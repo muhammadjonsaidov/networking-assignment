@@ -9,6 +9,7 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
 server:
   port: 8085
 
@@ -22,6 +23,7 @@ app:
       expirationAt: 9000000
 
 springdoc:
+  override-with-generic-response: false
   swagger-ui:
     path: /swagger-ui.html
     display-request-duration: true

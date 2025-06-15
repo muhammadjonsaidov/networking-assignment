@@ -9,11 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(
-        info = @Info(
-                title = "Your Project API",
-                version = "1.0",
-                description = "API documentation with JWT support"
-        ),
+        info = @Info(title = "Small CRM API", version = "1.0", description = "Small CRM API documentation"),
         security = @SecurityRequirement(name = "bearerAuth")
 )
 @SecurityScheme(

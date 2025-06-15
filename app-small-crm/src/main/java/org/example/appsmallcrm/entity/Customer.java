@@ -41,6 +41,7 @@ public class Customer {
     @Size(max = 255)
     private String address;
 
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
 

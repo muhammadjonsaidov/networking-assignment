@@ -50,6 +50,7 @@ public class Order {
     @Column(name = "order_date", columnDefinition = "DATE")
     private LocalDate orderDate;
 
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt;
 
